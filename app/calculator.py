@@ -1,11 +1,10 @@
 from decimal import Decimal, InvalidOperation
 from app.operations import OperationFactory
-from app.exceptions import OperationError, ValidationError
+from app.exceptions import ValidationError
 from app.calculation import Calculation
 from app.calculator_memento import Caretaker
 from app.history import History
 from app.logger import logger
-
 
 class Calculator:
     """Core Calculator handling calculations, history, and undo/redo with memento."""
@@ -22,7 +21,7 @@ class Calculator:
         for observer in self._observers:
             try:
                 observer.update(calculation)
-            except Exception as e:  # pragma: no cover
+            except Exception as e:
                 logger.error(f"Observer error: {e}")
 
     # ----- Validation -----
@@ -39,16 +38,18 @@ class Calculator:
         num2 = self._validate_number(b)
         operation = OperationFactory.create(operation_name)
 
+        # Save current history BEFORE adding new calculation
+        self._caretaker.save(self.history.list())
+
         result = operation.execute(num1, num2)
         calc = Calculation(num1, num2, operation_name, result)
 
-        # Add calculation to history and save snapshot
+        # Add calculation to history
         self.history.push(calc)
-        self._caretaker.save(self.history.list())
 
         self._notify_observers(calc)
         logger.info(f"Performed {operation_name}({num1}, {num2}) = {result}")
-        return result
+        return calc  # return Calculation object for display
 
     # ----- Undo / Redo -----
     def undo(self):
