@@ -13,7 +13,7 @@ class Calculator:
         self._caretaker = Caretaker()
         self._observers = []
 
-    # ----- Observer Pattern -----
+    # Observer Pattern
     def add_observer(self, observer):
         self._observers.append(observer)
 
@@ -24,14 +24,14 @@ class Calculator:
             except Exception as e:
                 logger.error(f"Observer error: {e}")
 
-    # ----- Validation -----
+    # Validation 
     def _validate_number(self, value):
         try:
             return Decimal(value)
         except (InvalidOperation, TypeError):
             raise ValidationError(f"Invalid numeric input: {value}")
 
-    # ----- Core Calculation -----
+    # Core Calculation
     def perform_calculation(self, a, b, operation_name):
         """Perform a calculation, save to history, notify observers, and store memento."""
         num1 = self._validate_number(a)
@@ -49,9 +49,9 @@ class Calculator:
 
         self._notify_observers(calc)
         logger.info(f"Performed {operation_name}({num1}, {num2}) = {result}")
-        return calc  # return Calculation object for display
+        return calc  # return Calculation object
 
-    # ----- Undo / Redo -----
+    # Undo & Redo 
     def undo(self):
         """Undo last operation using caretaker."""
         if self._caretaker.undo(self.history):
@@ -68,7 +68,7 @@ class Calculator:
         logger.info("Nothing to redo")
         return False
 
-    # ----- History Management -----
+    # History Management 
     def show_history(self):
         """Return list of calculation history."""
         return self.history.list()

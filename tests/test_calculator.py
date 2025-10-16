@@ -2,6 +2,7 @@ import pytest
 from decimal import Decimal
 from app.calculator import Calculator
 from app.exceptions import OperationError, ValidationError
+from unittest.mock import patch
 
 def test_valid_addition():
     calc = Calculator()
@@ -36,3 +37,29 @@ def test_undo_redo_behavior():
     calc.undo()
     calc.redo()
     assert calc.history.list() == prev
+
+def test_undo_logs_nothing(monkeypatch):
+    calc = Calculator()
+    # force caretaker.undo to return False
+    monkeypatch.setattr(calc._caretaker, "undo", lambda hist: False)
+    with patch("app.logger.logger.info") as mock_logger:
+        result = calc.undo()
+        assert result is False
+        mock_logger.assert_called_with("Nothing to undo")
+
+def test_redo_logs_nothing(monkeypatch):
+    calc = Calculator()
+    # force caretaker.redo to return False
+    monkeypatch.setattr(calc._caretaker, "redo", lambda hist: False)
+    with patch("app.logger.logger.info") as mock_logger:
+        result = calc.redo()
+        assert result is False
+        mock_logger.assert_called_with("Nothing to redo")
+
+def test_clear_history_logs(monkeypatch):
+    calc = Calculator()
+    calc.perform_calculation("1", "2", "add")
+    with patch("app.logger.logger.info") as mock_logger:
+        calc.clear_history()
+        assert calc.show_history() == []
+        mock_logger.assert_called_with("Cleared history")
