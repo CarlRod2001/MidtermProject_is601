@@ -2,6 +2,7 @@
 ![CI](https://github.com/CarlRod2001/MidtermProject_is601/actions/workflows/python-app.yml/badge.svg)
 
 **Project Summary**
+
 This project is a modular Python calculator designed to demonstrate software engineering concepts such as:
 
 Object-oriented design (Calculator, Calculation, Operations classes)
