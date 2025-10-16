@@ -1,6 +1,30 @@
 # 📦 Midterm Project Setup
 ![CI](https://github.com/CarlRod2001/MidtermProject_is601/actions/workflows/python-app.yml/badge.svg)
 
+**Project Summary**
+This project is a modular Python calculator designed to demonstrate software engineering concepts such as:
+
+Object-oriented design (Calculator, Calculation, Operations classes)
+
+Design patterns (Observer and Memento for undo/redo functionality)
+
+Error handling with custom exceptions (ValidationError, OperationError)
+
+History management with undo/redo capabilities
+
+Unit testing and test coverage tracking using pytest and pytest-cov
+
+Optional Docker support for containerized execution
+
+The calculator supports arithmetic operations, including:
+
+Basic: add, subtract, multiply, divide
+
+Advanced: power, root, modulus, int_divide, percent, abs_diff
+
+History management: history, clear, undo, redo
+
+Logging and observer notifications for calculations
 ---
 
 # 🧩 1. Install Homebrew (Mac Only)
