@@ -4,10 +4,10 @@ from decimal import Decimal
 
 @dataclass
 class Calculation:
-    "Represents a single calculation record with operands, operation, result, and timestamp."
-    operation: str
+    """Represents a single calculation record with operands, operation, result, and timestamp."""
     operand1: Decimal
     operand2: Decimal
+    operation: str
     result: Decimal
     timestamp: datetime = datetime.now()
 
@@ -25,11 +25,10 @@ class Calculation:
         from decimal import Decimal
         from datetime import datetime
         ts = datetime.fromisoformat(d["timestamp"]) if "timestamp" in d else datetime.now()
-        
         return cls(
-            operation=d["operation"],
             operand1=Decimal(d["operand1"]),
             operand2=Decimal(d["operand2"]),
+            operation=d["operation"],
             result=Decimal(d["result"]),
             timestamp=ts
         )

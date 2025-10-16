@@ -74,9 +74,11 @@ def calculator_repl():
                         print("Cancelled.")
                         continue
 
-                    # FIX: correct argument order (a, b, operation)
-                    result = calc.perform_calculation(a, b, cmd)
-                    print(f"Result: {result}")
+                    # perform calculation
+                    calc_obj = calc.perform_calculation(a, b, cmd)
+
+                    # ✅ print ONLY numeric result
+                    print(f"Result: {calc_obj.result}")
 
                 except (ValidationError, OperationError) as e:
                     print(f"Error: {e}")
