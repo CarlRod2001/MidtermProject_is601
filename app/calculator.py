@@ -1,55 +1,79 @@
 from decimal import Decimal, InvalidOperation
-from app.exceptions import ValidationError, OperationError
 from app.operations import OperationFactory
+from app.exceptions import OperationError, ValidationError
 from app.calculation import Calculation
+from app.calculator_memento import Caretaker
+from app.history import History
+from app.logger import logger
 
 
 class Calculator:
-    "Core calculator class handling operations, history, and state management."
+    """Core Calculator handling calculations, history, and undo/redo with memento."""
     def __init__(self):
-        self.history = []
-        self.undone = []
+        self.history = History()
+        self._caretaker = Caretaker()
+        self._observers = []
 
-    def validate_input(self, value):
-        """Convert input to Decimal and validate."""
+    # ----- Observer Pattern -----
+    def add_observer(self, observer):
+        self._observers.append(observer)
+
+    def _notify_observers(self, calculation):
+        for observer in self._observers:
+            try:
+                observer.update(calculation)
+            except Exception as e:  # pragma: no cover
+                logger.error(f"Observer error: {e}")
+
+    # ----- Validation -----
+    def _validate_number(self, value):
         try:
             return Decimal(value)
-        except (InvalidOperation, ValueError):
+        except (InvalidOperation, TypeError):
             raise ValidationError(f"Invalid numeric input: {value}")
 
+    # ----- Core Calculation -----
     def perform_calculation(self, a, b, operation_name):
-        """Perform the calculation and store the result."""
-        a = self.validate_input(a)
-        b = self.validate_input(b)
+        """Perform a calculation, save to history, notify observers, and store memento."""
+        num1 = self._validate_number(a)
+        num2 = self._validate_number(b)
         operation = OperationFactory.create(operation_name)
 
-        result = operation.execute(a, b)
-        calc = Calculation(a, b, operation_name, result)
-        self.history.append(calc)
-        self.undone.clear()
+        result = operation.execute(num1, num2)
+        calc = Calculation(num1, num2, operation_name, result)
+
+        # Add calculation to history and save snapshot
+        self.history.push(calc)
+        self._caretaker.save(self.history.list())
+
+        self._notify_observers(calc)
+        logger.info(f"Performed {operation_name}({num1}, {num2}) = {result}")
         return result
 
-    def show_history(self):
-        """Return a list of calculation strings."""
-        return [str(calc) for calc in self.history]
-
+    # ----- Undo / Redo -----
     def undo(self):
-        """Undo the last operation."""
-        if not self.history:
-            return False
-        last = self.history.pop()
-        self.undone.append(last)
-        return True
+        """Undo last operation using caretaker."""
+        if self._caretaker.undo(self.history):
+            logger.info("Undo last operation")
+            return True
+        logger.info("Nothing to undo")
+        return False
 
     def redo(self):
-        """Redo the last undone operation."""
-        if not self.undone:
-            return False
-        calc = self.undone.pop()
-        self.history.append(calc)
-        return True
+        """Redo last undone operation using caretaker."""
+        if self._caretaker.redo(self.history):
+            logger.info("Redo operation")
+            return True
+        logger.info("Nothing to redo")
+        return False
+
+    # ----- History Management -----
+    def show_history(self):
+        """Return list of calculation history."""
+        return self.history.list()
 
     def clear_history(self):
-        """Clear all history and undo stacks."""
+        """Clear history and caretaker stacks."""
         self.history.clear()
-        self.undone.clear()
+        self._caretaker = Caretaker()
+        logger.info("Cleared history")
