@@ -1,10 +1,13 @@
 from app.calculator import Calculator
 from app.exceptions import ValidationError, OperationError
+from colorama import init, Fore, Back, Style
 
+# Initialize Colorama
+init(autoreset=True)
 
 def calculator_repl():
     calc = Calculator()
-    print("Calculator started. Type 'help' for commands.")
+    print(Back.WHITE + Fore.BLACK + "Calculator started. Type 'help' for commands.")
 
     valid_ops = [
         'add', 'subtract', 'multiply', 'divide',
@@ -20,46 +23,46 @@ def calculator_repl():
 
             # ----- Help -----
             if cmd == 'help':
-                print("Available Commands:")
-                print("  " + ", ".join(valid_ops))
-                print("  history - Show calculation history")
-                print("  clear - Clear calculation history")
-                print("  undo - Undo the last calculation")
-                print("  redo - Redo the last undone calculation")
-                print("  exit - Exit the calculator")
+                print(Fore.YELLOW + "Available Commands:")
+                print(Fore.CYAN + "  " + ", ".join(valid_ops))
+                print(Fore.MAGENTA + "  history - Show calculation history")
+                print(Fore.MAGENTA + "  clear - Clear calculation history")
+                print(Fore.MAGENTA + "  undo - Undo the last calculation")
+                print(Fore.MAGENTA + "  redo - Redo the last undone calculation")
+                print(Fore.RED + "  exit - Exit the calculator")
                 continue
 
             # ----- Exit -----
             if cmd == 'exit':
-                print("Goodbye!")
+                print(Fore.YELLOW + "Goodbye!")
                 break
 
             # ----- History -----
             if cmd == 'history':
                 items = calc.show_history()
                 if not items:
-                    print("No history.")
+                    print(Fore.MAGENTA + "No history.")
                 else:
                     for i, c in enumerate(items, 1):
-                        print(f"{i}. {c}")
+                        print(Fore.MAGENTA + f"{i}. {c}")
                 continue
 
             # ----- Clear -----
             if cmd == 'clear':
                 calc.clear_history()
-                print("History cleared.")
+                print(Fore.CYAN + "History cleared.")
                 continue
 
             # ----- Undo -----
             if cmd == 'undo':
                 ok = calc.undo()
-                print("Undid last operation." if ok else "Nothing to undo.")
+                print(Fore.MAGENTA + ("Undid last operation." if ok else "Nothing to undo."))
                 continue
 
             # ----- Redo -----
             if cmd == 'redo':
                 ok = calc.redo()
-                print("Redid last operation." if ok else "Nothing to redo.")
+                print(Fore.MAGENTA + ("Redid last operation." if ok else "Nothing to redo."))
                 continue
 
             # ----- Arithmetic Operations -----
@@ -67,30 +70,30 @@ def calculator_repl():
                 try:
                     a = input("First number: ").strip()
                     if a.lower() == 'cancel':
-                        print("Cancelled.")
+                        print(Fore.RED + "Operation cancelled.")
                         continue
                     b = input("Second number: ").strip()
                     if b.lower() == 'cancel':
-                        print("Cancelled.")
+                        print(Fore.RED + "Operation cancelled.")
                         continue
 
                     # perform calculation
                     calc_obj = calc.perform_calculation(a, b, cmd)
 
                     # ✅ print ONLY numeric result
-                    print(f"Result: {calc_obj.result}")
+                    print(Fore.GREEN + f"Result: {calc_obj.result}")
 
                 except (ValidationError, OperationError) as e:
-                    print(f"Error: {e}")
+                    print(Fore.RED + f"Error: {e}")
                 except Exception as e:
-                    print(f"Unexpected error: {e}")
+                    print(Fore.RED + f"Unexpected error: {e}")
                 continue
 
-            print(f"Unknown command '{cmd}'. Type 'help'.")
+            print(Fore.YELLOW + f"Unknown command '{cmd}'. Type 'help'.")
 
         except KeyboardInterrupt:
-            print("\nCancelled.")
+            print(Fore.RED + "\nCancelled.")
             continue
         except EOFError:
-            print("\nExit.")
+            print(Fore.BLACK + "\nExit.")
             break

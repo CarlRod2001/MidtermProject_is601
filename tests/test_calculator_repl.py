@@ -1,4 +1,5 @@
 from unittest.mock import patch, MagicMock
+import re
 import pytest
 from app.calculator_repl import calculator_repl
 from app.exceptions import ValidationError, OperationError
@@ -76,9 +77,12 @@ def test_cancel_input(capsys):
             calculator_repl()
         with patch("builtins.input", side_effect=["add", "1", "cancel", "exit"]):
             calculator_repl()
-    out = capsys.readouterr().out
-    assert "Cancelled" in out
 
+    out = capsys.readouterr().out
+
+    # Remove ANSI color codes for easier assertion
+    clean_out = re.sub(r"\x1b\[[0-9;]*m", "", out)
+    assert "Operation cancelled." in clean_out
 
 def test_exceptions(capsys):
     fake_calc = MagicMock()
